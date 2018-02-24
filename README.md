@@ -1,67 +1,117 @@
-**DocuAPI** is a beautiful multilingual API documentation theme for [Hugo](http://gohugo.io/). This theme is built on top of the beautiful work of [Robert Lord](https://github.com/lord) and others on the [Slate](https://github.com/lord/slate) project ([Apache 2 License](https://github.com/lord/slate/blob/master/LICENSE)).
+# Victor Hugo
 
-<br/>
+**A Hugo boilerplate for creating truly epic websites**
 
-> Visit the [demo site](https://docuapi.com/).
+This is a boilerplate for using [Hugo](https://gohugo.io/) as a static site generator and [Gulp](https://gulpjs.com/) + [Webpack](https://webpack.js.org/) as your asset pipeline.
 
-<br/>
+Victor Hugo setup to use [PostCSS](http://postcss.org/) and [Babel](https://babeljs.io/) for CSS and JavaScript compiling/transpiling.
 
-![Screenshot DocuAPI Example site](https://raw.githubusercontent.com/bep/docuapi/master/images/screenshot.png)
+This project is released under the [MIT license](LICENSE). Please make sure you understand its implications and guarantees.
 
-## Use
+## Usage
 
-See the [exampleSite](https://github.com/bep/docuapi/tree/master/exampleSite) and more specific its site [configuration](https://github.com/bep/docuapi/blob/master/exampleSite/config.toml) for the available options.
+### Prerequisites
 
-**Most notable:** This theme will use all the (non drafts) pages in the site and build a single-page API documentation. Using `weight` in the page front matter is the easiest way to control page order.
+You need to have the latest/LTS [node](https://nodejs.org/en/download/) and [npm](https://www.npmjs.com/get-npm) versions installed in order to use Victor Hugo.
 
-If you want a different page selection, please provide your own `layouts/index.html` template.
-
-## Hooks
-
-When the fix for [#2549](https://github.com/spf13/hugo/issues/2549) is released we may do this with blocks, but until then you can provide some custom partials:
-
-* `partials/hook_head_end.html` is inserted right before the `head` end tag. Useful for additional styles etc.
-* `partials/hook_body_end.html` which should be clear by its name.
-* `partials/hook_left_sidebar_start.html` the start of the left sidebar
-* `partials/hook_left_sidebar_end.html` the end of the left sidebar
-* `partials/hook_left_sidebar_logo.html` the log `img` source
-
-The styles and Javascript import are also put in each partial and as such can be overridden if really needed:
-
-* `partials/styles.html`
-* `partials/js.html`
-
-## Develop the Theme
-
-**Note:** In most situations you will be well off just using the theme and maybe in some cases provide your own template(s). Please refer to the [Hugo Documentation](http://gohugo.io/overview/introduction/) for that.
-
-But you may find styling issues, etc., that you want to fix. Those Pull Requests are warmly welcomed!
-
-**If you find issues that obviously belongs to  [Slate](https://github.com/lord/slate), then please report/fix them there, and we will pull in the latest changes here.**
-
-This project provides a very custom asset bundler in [bundler.go](https://github.com/bep/docuapi/blob/master/bundler.go) written in Go.
-
-It depends on `libsass` to build, so you will need `gcc` (a C compiler) to build it for your platform. If that is present, you can try:
-
-* `go get -u -v .`
-* `go run bundler.go` (this will clone Slate to a temp folder)
-* Alternative  to the above if you already have Slate cloned somewhere: `go run bundler.go -slate=/path/to/Slate`
-
-All options:
+Next step, clone this repository and run:
 
 ```bash
-go run bundler.go -h
-  -minify
-    	apply minification to output Javascript, CSS etc. (default true)
-  -slate string
-    	the path to the Slate source, if not set it will be cloned from https://github.com/lord/slate.git
+npm install
 ```
 
-With `make` and `fswatch` (OSX only, I believe) available, you can get a fairly enjoyable live-reloading development experience for all artifacts by running:
+This will take some time and will install all packages necessary to run Victor Hugo and it's tasks.
 
-* `hugo server` in your Hugo site project.
-* `make serve` in the theme folder.
+### Development
+
+While developing your website, use:
+
+```bash
+npm start
+```
+
+or
+
+```bash
+gulp server
+```
+
+Then visit http://localhost:3000/ *- or a new browser windows popped-up already -* to preview your new website. BrowserSync will automatically reload the CSS or refresh the whole page, when stylesheets or content changes.
+
+### Static build
+
+To build a static version of the website inside the `/dist` folder, run:
+
+```bash
+npm run build
+```
+
+To get a preview of posts or articles not yet published, run:
+
+```bash
+npm run build-preview
+```
+
+See [package.json](package.json#L7) or the included gulp file for all tasks.
+
+## Structure
+
+```
+|--site                // Everything in here will be built with hugo
+|  |--content          // Pages and collections - ask if you need extra pages
+|  |--data             // YAML data files with any data for use in examples
+|  |--layouts          // This is where all templates go
+|  |  |--partials      // This is where includes live
+|  |  |--index.html    // The index page
+|  |--static           // Files in here ends up in the public folder
+|--src                 // Files that will pass through the asset pipeline
+|  |--css              // CSS files in the root of this folder will end up in /css/...
+|  |--js               // app.js will be compiled to /app.js with babel
+```
+
+## Basic Concepts
+
+You can read more about Hugo's template language in their documentation here:
+
+https://gohugo.io/templates/overview/
+
+The most useful page there is the one about the available functions:
+
+https://gohugo.io/templates/functions/
+
+For assets that are completely static and don't need to go through the asset pipeline,
+use the `site/static` folder. Images, font-files, etc, all go there.
+
+Files in the static folder ends up in the web root. So a file called `site/static/favicon.ico`
+will end up being available as `/favicon.ico` and so on...
+
+The `src/js/app.js` file is the entrypoint for webpack and will be built to `/dist/app.js`.
+
+You can use **ES6** and use both relative imports or import libraries from npm.
+
+Any CSS file directly under the `src/css/` folder will get compiled with [PostCSS Next](http://cssnext.io/)
+to `/dist/css/{filename}.css`. Import statements will be resolved as part of the build
+
+## Environment variables
+
+To separate the development and production *- aka build -* stages, all gulp tasks run with a node environment variable named either `development` or `production`.
+
+You can access the environment variable inside the theme files with `getenv "NODE_ENV"`. See the following example for a conditional statement:
+
+    {{ if eq (getenv "NODE_ENV") "development" }}You're in development!{{ end }}
+
+All tasks starting with *build* set the environment variable to `production` - the other will set it to `development`.
+
+## Deploying to Netlify
+
+- Push your clone to your own GitHub repository.
+- [Create a new site on Netlify](https://app.netlify.com/start) and link the repository.
+
+Now Netlify will build and deploy your site whenever you push to git.
+
+You can also click this button:
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/netlify/victor-hugo)
 
 
-
-
+## Enjoy!! 😸
